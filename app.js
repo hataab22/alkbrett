@@ -16,6 +16,27 @@ const n = (v) => {
 };
 const fmt = (v, d = 2) => n(v).toLocaleString("ar-SA", { maximumFractionDigits: d });
 
+function peLabel(pe) {
+  if (pe > 0 && pe < 10) return { label: "ممتاز", cls: "pe-excellent" };
+  if (pe >= 10 && pe < 15) return { label: "جيد", cls: "pe-good" };
+  if (pe >= 15 && pe < 20) return { label: "عادل", cls: "pe-fair" };
+  if (pe >= 20 && pe < 30) return { label: "مرتفع", cls: "pe-high" };
+  if (pe >= 30) return { label: "مبالغ فيه", cls: "pe-overpriced" };
+  return { label: "غير واضح", cls: "pe-fair" };
+}
+
+function getPeData() {
+  const stockName = document.getElementById("stockName").value.trim() || "السهم";
+  const price = n(document.getElementById("pePrice").value);
+  const q = n(document.getElementById("quarterEps").value);
+  const yearly = q * 4;
+  const pe = yearly ? price / yearly : 0;
+  const tag = peLabel(pe);
+  const targetLevels = [12, 15, 17, 19, 25, 27];
+  const targets = targetLevels.map((level) => ({ level, price: level * yearly }));
+  return { stockName, price, q, yearly, pe, tag, targets };
+}
+
 function calcDeals() {
   const shares = n(document.getElementById("shares").value);
   const buyPrice = n(document.getElementById("buyPrice").value);
@@ -41,74 +62,142 @@ function calcDeals() {
 }
 
 function calcPe() {
-  const stockName = document.getElementById("stockName").value.trim() || "السهم";
-  const price = n(document.getElementById("pePrice").value);
-  const q = n(document.getElementById("quarterEps").value);
-  const yearly = q * 4;
-  // مطابق لمعادلة الإكسل: =IFERROR((E13/E15),"")
-  const pe = yearly ? price / yearly : 0;
+  const { stockName, q, yearly, pe, tag, targets } = getPeData();
 
   document.getElementById("yearlyEps").value = yearly ? yearly.toFixed(4) : "";
   document.getElementById("targetPe").value = pe ? pe.toFixed(2) : "";
 
-  let label = "غير واضح";
-  let cls = "pe-fair";
-  if (pe > 0 && pe < 10) {
-    label = "ممتاز";
-    cls = "pe-excellent";
-  } else if (pe >= 10 && pe < 15) {
-    label = "جيد";
-    cls = "pe-good";
-  } else if (pe >= 15 && pe < 20) {
-    label = "عادل";
-    cls = "pe-fair";
-  } else if (pe >= 20 && pe < 30) {
-    label = "مرتفع";
-    cls = "pe-high";
-  } else if (pe >= 30) {
-    label = "مبالغ فيه";
-    cls = "pe-overpriced";
-  }
-
-  // مستويات السعر المستهدف مثل الإكسل (Q13:Q18 = المضاعف * ربحية السنة)
-  const targetLevels = [12, 15, 17, 19, 25, 27];
-  const levelClass = (level) => {
-    if (level < 10) return "pe-excellent";
-    if (level < 15) return "pe-good";
-    if (level < 20) return "pe-fair";
-    if (level < 30) return "pe-high";
-    return "pe-overpriced";
-  };
-  const targetsHtml = targetLevels
-    .map(
-      (level) =>
-        `<li><span class="pe-badge ${levelClass(level)}">${level}x</span> <strong>${fmt(level * yearly, 2)}</strong></li>`,
-    )
+  const rangeRows = [
+    { text: "ممتاز جدًا < 10", cls: "pe-excellent" },
+    { text: "ممتاز 10 - 13", cls: "pe-good" },
+    { text: "جيد 14 - 16", cls: "pe-fair" },
+    { text: "جيد 17 - 18", cls: "pe-high" },
+    { text: "عادي 19 - 25", cls: "pe-overpriced" },
+    { text: "سيء 26 - 28", cls: "pe-bad" },
+    { text: "سيء جدًا > 28", cls: "pe-worst" },
+  ];
+  const rangesHtml = rangeRows
+    .map((row) => `<tr class="${row.cls}"><td>${row.text}</td></tr>`)
+    .join("");
+  const targetRows = targets
+    .map((item) => `<tr><td>${item.level}</td><td>${fmt(item.price, 2)}</td></tr>`)
     .join("");
 
   document.getElementById("peResult").innerHTML = `
-    اسم السهم: <strong>${stockName}</strong><br>
-    ربحية السهم (آخر ربع معلن): ${fmt(q, 4)}<br>
-    ربحية سنوية: ${fmt(yearly, 4)}<br>
-    مكرر الربحية (المستهدف): <strong>${fmt(pe, 2)}</strong><br>
-    التصنيف: <span class="pe-badge ${cls}">${label}</span>
-    <div class="pe-side-by-side">
-      <div class="target-box">
-        أسعار مستهدفة مبنية على ربحية السنة:
-        <ul>${targetsHtml}</ul>
+    <div class="pe-board">
+      <div class="pe-board-title">استراتيجية المخضرم لتقييم سعر السهم المستهدف</div>
+      <div class="pe-board-grid">
+        <div class="pe-card">
+          <div class="pe-card-head">معلومات الشركة</div>
+          <table class="pe-table">
+            <tr><th>البند</th><th>القيمة</th></tr>
+            <tr><td>اسم الشركة</td><td>${stockName}</td></tr>
+            <tr><td>سعر السهم</td><td>${fmt(price, 2)}</td></tr>
+            <tr><td>ربحية السهم لآخر ربع معلن</td><td>${fmt(q, 4)}</td></tr>
+            <tr><td>ربحية السهم للسنة</td><td>${fmt(yearly, 4)}</td></tr>
+            <tr><td>مكرر الربحية</td><td><strong>${fmt(pe, 2)}</strong></td></tr>
+          </table>
+        </div>
+
+        <div class="pe-card">
+          <div class="pe-card-head">نطاق تقييم مكرر الربحية</div>
+          <table class="pe-table pe-range-table">
+            ${rangesHtml}
+          </table>
+          <p class="pe-tag-line">التصنيف الحالي: <span class="pe-badge ${tag.cls}">${tag.label}</span></p>
+        </div>
+
+        <div class="pe-card">
+          <div class="pe-card-head">المستهدف</div>
+          <table class="pe-table pe-target-table">
+            <tr><th>المكرر</th><th>عند سعر</th></tr>
+            ${targetRows}
+          </table>
+        </div>
       </div>
-      <div class="pe-ranges">
-        نطاق تقييم المكرر:
-        <ul>
-          <li><span class="pe-badge pe-excellent">ممتاز</span> أقل من 10</li>
-          <li><span class="pe-badge pe-good">جيد</span> من 10 إلى أقل من 15</li>
-          <li><span class="pe-badge pe-fair">عادل</span> من 15 إلى أقل من 20</li>
-          <li><span class="pe-badge pe-high">مرتفع</span> من 20 إلى أقل من 30</li>
-          <li><span class="pe-badge pe-overpriced">مبالغ فيه</span> 30 فأكثر</li>
-        </ul>
-      </div>
+      <p class="pe-credits">
+        استراتيجية المخضرم هنا مطبقة على حساب مكرر الربحية فقط.
+        حساب المخضرم في X: <a href="https://x.com/SenseiFund" target="_blank" rel="noreferrer">@SenseiFund</a>
+        | حساب الكبريت في X: <a href="https://x.com/alkbrett" target="_blank" rel="noreferrer">@alkbrett</a>
+      </p>
     </div>
   `;
+}
+
+function renderPeShareCard() {
+  const { stockName, q, yearly, pe, tag, targets } = getPeData();
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 630;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#0b1528";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  grad.addColorStop(0, "#163867");
+  grad.addColorStop(1, "#0d1930");
+  ctx.fillStyle = grad;
+  ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+  ctx.fillStyle = "#f6f2e8";
+  ctx.font = "bold 50px Segoe UI";
+  ctx.textAlign = "right";
+  ctx.fillText("الكبريت | مكرر الربحية", 1120, 95);
+  ctx.font = "30px Segoe UI";
+  ctx.fillStyle = "#ffe8bd";
+  ctx.fillText(`السهم: ${stockName}`, 1120, 150);
+
+  ctx.fillStyle = "#f6f2e8";
+  ctx.font = "28px Segoe UI";
+  ctx.fillText(`ربحية آخر ربع: ${fmt(q, 4)}`, 1120, 220);
+  ctx.fillText(`ربحية السنة: ${fmt(yearly, 4)}`, 1120, 265);
+  ctx.fillText(`مكرر الربحية المستهدف: ${fmt(pe, 2)}`, 1120, 310);
+  ctx.fillText(`التصنيف: ${tag.label}`, 1120, 355);
+
+  ctx.font = "24px Segoe UI";
+  ctx.fillStyle = "#ffd896";
+  ctx.fillText("المستهدفات:", 1120, 410);
+  ctx.fillStyle = "#f6f2e8";
+  targets.forEach((t, i) => {
+    ctx.fillText(`${t.level}x = ${fmt(t.price, 2)}`, 1120, 445 + i * 28);
+  });
+
+  // علامة مائية
+  ctx.globalAlpha = 0.15;
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 70px Segoe UI";
+  ctx.fillText("@alkbrett", 1120, 595);
+  ctx.globalAlpha = 1;
+
+  return canvas;
+}
+
+function downloadPeImage() {
+  const canvas = renderPeShareCard();
+  const link = document.createElement("a");
+  link.download = `alkebreet-pe-${Date.now()}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+
+async function shareOnX() {
+  const { stockName, pe, tag } = getPeData();
+  const text = `نتيجة ${stockName}\nمكرر الربحية المستهدف: ${fmt(pe, 2)}\nالتصنيف: ${tag.label}\n#الكبريت #الاسهم`;
+  const canvas = renderPeShareCard();
+
+  if (navigator.canShare && navigator.share) {
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    if (blob) {
+      const file = new File([blob], "alkebreet-pe.png", { type: "image/png" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text });
+        return;
+      }
+    }
+  }
+
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
 }
 
 function calcAverage() {
@@ -153,3 +242,10 @@ calcPe();
 calcAverage();
 calcBuy();
 calcClean();
+
+document.getElementById("savePeImage").addEventListener("click", downloadPeImage);
+document.getElementById("sharePeX").addEventListener("click", () => {
+  shareOnX().catch(() => {
+    window.open("https://twitter.com/intent/tweet", "_blank");
+  });
+});
