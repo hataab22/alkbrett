@@ -147,6 +147,7 @@ input {
   border-radius: 8px;
   padding: 8px;
   background: rgba(10, 25, 47, 0.75);
+  position: relative;
 }
 .pe-card-head {
   background: #e7d394;
@@ -183,6 +184,15 @@ input {
 }
 .pe-credits a {
   color: #ffd37f;
+}
+.pe-watermark {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 1px;
+  pointer-events: none;
 }
 .target-box {
   margin-top: 12px;
