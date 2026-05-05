@@ -14,9 +14,9 @@ const n = (v) => {
   const x = parseFloat(v);
   return Number.isFinite(x) ? x : 0;
 };
-const fmt = (v, d = 2) => n(v).toLocaleString("ar-SA", { maximumFractionDigits: d });
+const fmt = (v, d = 2) => n(v).toLocaleString("en-US", { maximumFractionDigits: d });
 const todayAr = () =>
-  new Date().toLocaleDateString("ar-SA", {
+  new Date().toLocaleDateString("en-GB", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -104,6 +104,7 @@ function calcPe() {
             <tr><td>ربحية السهم للسنة</td><td>${fmt(yearly, 4)}</td></tr>
             <tr><td>مكرر الربحية</td><td><strong>${fmt(pe, 2)}</strong></td></tr>
           </table>
+          <div class="pe-watermark">@alkbrett</div>
         </div>
 
         <div class="pe-card">
@@ -132,58 +133,23 @@ function calcPe() {
   `;
 }
 
-function renderPeShareCard() {
-  const { stockName, q, yearly, pe, tag, targets } = getPeData();
-  const today = todayAr();
-  const canvas = document.createElement("canvas");
-  canvas.width = 1200;
-  canvas.height = 630;
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = "#0b1528";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  grad.addColorStop(0, "#163867");
-  grad.addColorStop(1, "#0d1930");
-  ctx.fillStyle = grad;
-  ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-  ctx.fillStyle = "#f6f2e8";
-  ctx.font = "bold 50px Segoe UI";
-  ctx.textAlign = "right";
-  ctx.fillText("الكبريت | مكرر الربحية", 1120, 95);
-  ctx.font = "30px Segoe UI";
-  ctx.fillStyle = "#ffe8bd";
-  ctx.fillText(`السهم: ${stockName}`, 1120, 150);
-
-  ctx.fillStyle = "#f6f2e8";
-  ctx.font = "28px Segoe UI";
-  ctx.fillText(`ربحية آخر ربع: ${fmt(q, 4)}`, 1120, 220);
-  ctx.fillText(`ربحية السنة: ${fmt(yearly, 4)}`, 1120, 265);
-  ctx.fillText(`مكرر الربحية المستهدف: ${fmt(pe, 2)}`, 1120, 310);
-  ctx.fillText(`التصنيف: ${tag.label}`, 1120, 355);
-  ctx.fillText(`التاريخ: ${today}`, 1120, 400);
-
-  ctx.font = "24px Segoe UI";
-  ctx.fillStyle = "#ffd896";
-  ctx.fillText("المستهدفات:", 1120, 450);
-  ctx.fillStyle = "#f6f2e8";
-  targets.forEach((t, i) => {
-    ctx.fillText(`${t.level}x = ${fmt(t.price, 2)}`, 1120, 485 + i * 24);
+async function renderPeShareCard() {
+  const resultNode = document.querySelector("#peResult .pe-board");
+  if (!resultNode) {
+    throw new Error("لا توجد نتيجة لالتقاطها.");
+  }
+  if (!window.html2canvas) {
+    throw new Error("مكتبة التصوير غير محملة.");
+  }
+  return window.html2canvas(resultNode, {
+    scale: 2,
+    backgroundColor: null,
+    useCORS: true,
   });
-
-  // علامة مائية
-  ctx.globalAlpha = 0.15;
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 70px Segoe UI";
-  ctx.fillText("@alkbrett", 1120, 595);
-  ctx.globalAlpha = 1;
-
-  return canvas;
 }
 
-function downloadPeImage() {
-  const canvas = renderPeShareCard();
+async function downloadPeImage() {
+  const canvas = await renderPeShareCard();
   const link = document.createElement("a");
   link.download = `alkebreet-pe-${Date.now()}.png`;
   link.href = canvas.toDataURL("image/png", 1.0);
@@ -195,7 +161,7 @@ function downloadPeImage() {
 async function shareOnX() {
   const { stockName, pe, tag } = getPeData();
   const text = `نتيجة ${stockName}\nمكرر الربحية المستهدف: ${fmt(pe, 2)}\nالتصنيف: ${tag.label}\n#الكبريت #الاسهم`;
-  const canvas = renderPeShareCard();
+  const canvas = await renderPeShareCard();
 
   if (navigator.canShare && navigator.share) {
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
@@ -255,7 +221,11 @@ calcAverage();
 calcBuy();
 calcClean();
 
-document.getElementById("savePeImage").addEventListener("click", downloadPeImage);
+document.getElementById("savePeImage").addEventListener("click", () => {
+  downloadPeImage().catch(() => {
+    alert("تعذر حفظ الصورة. تأكد أن النتيجة ظاهرة ثم حاول مرة أخرى.");
+  });
+});
 document.getElementById("sharePeX").addEventListener("click", () => {
   shareOnX().catch(() => {
     window.open("https://twitter.com/intent/tweet", "_blank");
