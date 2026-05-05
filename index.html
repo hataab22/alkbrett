@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الكبريت | حاسبة الأسهم</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <h1>الكبريت</h1>
+      <p>حاسبة الأسهم الاحترافية</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-target="deals">الصفقات</button>
+      <button class="tab" data-target="pe">مكرر الربحية</button>
+      <button class="tab" data-target="average">متوسط السعر</button>
+      <button class="tab" data-target="buy">شراء الأسهم</button>
+      <button class="tab" data-target="clean">تطهير الأسهم</button>
+    </nav>
+
+    <section id="deals" class="panel active">
+      <h2>متابعة الصفقات</h2>
+      <div class="grid">
+        <label>عدد الأسهم <input id="shares" type="number"></label>
+        <label>سعر الشراء <input id="buyPrice" type="number" step="0.01"></label>
+        <label>سعر البيع <input id="sellPrice" type="number" step="0.01"></label>
+        <label>نسبة العمولة <input id="commission" type="number" step="0.00001" value="0.00155"></label>
+        <label>نسبة الضريبة <input id="tax" type="number" step="0.01" value="0.15"></label>
+      </div>
+      <div id="dealsResult" class="result"></div>
+      <p class="hint">هذه الصفحة من إعداد الكبريت.</p>
+    </section>
+
+    <section id="pe" class="panel">
+      <h2>مكرر الربحية</h2>
+      <div class="grid">
+        <label>اسم السهم <input id="stockName" type="text" placeholder="مثال: أرامكو"></label>
+        <label>سعر السهم <input id="pePrice" type="number" step="0.01"></label>
+        <label>ربحية السهم (آخر ربع معلن) <input id="quarterEps" type="number" step="0.0001"></label>
+        <label>ربحية السنة <input id="yearlyEps" type="number" step="0.0001" readonly></label>
+        <label>مكرر الربحية (المستهدف) <input id="targetPe" type="number" step="0.01" readonly></label>
+      </div>
+      <p class="hint">النتيجة تظهر بالألوان مع تصنيف واضح: ممتاز / جيد / عادل / مرتفع / مبالغ فيه (وفق استراتيجية المخضرم).</p>
+      <div id="peResult" class="result"></div>
+      <section class="info-panel">
+        <h2>استراتيجية المخضرم</h2>
+        <p>
+          استراتيجية المخضرم هنا مطبقة على <strong>حساب مكرر الربحية فقط</strong>.
+          بقية الحاسبات في الموقع من إعداد وتطوير <strong>الكبريت</strong>.
+        </p>
+        <p class="x-links">
+          حساب المخضرم في X: <a href="https://x.com/SenseiFund" target="_blank" rel="noreferrer">@SenseiFund</a><br>
+          حساب الكبريت في X: <a href="https://x.com/alkbrett" target="_blank" rel="noreferrer">@alkbrett</a>
+        </p>
+      </section>
+    </section>
+
+    <section id="average" class="panel">
+      <h2>متوسط سعر الشراء</h2>
+      <div class="grid">
+        <label>كمية 1 <input class="qty" type="number"></label>
+        <label>سعر 1 <input class="price" type="number" step="0.01"></label>
+        <label>كمية 2 <input class="qty" type="number"></label>
+        <label>سعر 2 <input class="price" type="number" step="0.01"></label>
+        <label>كمية 3 <input class="qty" type="number"></label>
+        <label>سعر 3 <input class="price" type="number" step="0.01"></label>
+      </div>
+      <div id="avgResult" class="result"></div>
+      <p class="hint">هذه الصفحة من إعداد الكبريت.</p>
+    </section>
+
+    <section id="buy" class="panel">
+      <h2>كم سهم أقدر أشتري؟</h2>
+      <div class="grid">
+        <label>المبلغ المتاح <input id="budget" type="number" step="0.01"></label>
+        <label>سعر السهم <input id="stockPrice" type="number" step="0.01"></label>
+      </div>
+      <div id="buyResult" class="result"></div>
+      <p class="hint">هذه الصفحة من إعداد الكبريت.</p>
+    </section>
+
+    <section id="clean" class="panel">
+      <h2>تطهير الأسهم</h2>
+      <div class="grid">
+        <label>عدد الأسهم <input id="cleanShares" type="number"></label>
+        <label>مبلغ التطهير لكل سهم <input id="cleanPerShare" type="number" step="0.0001"></label>
+      </div>
+      <div id="cleanResult" class="result"></div>
+      <p class="hint">هذه الصفحة من إعداد الكبريت.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
