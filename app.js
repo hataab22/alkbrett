@@ -62,7 +62,7 @@ function calcDeals() {
 }
 
 function calcPe() {
-  const { stockName, q, yearly, pe, tag, targets } = getPeData();
+  const { stockName, price, q, yearly, pe, tag, targets } = getPeData();
 
   document.getElementById("yearlyEps").value = yearly ? yearly.toFixed(4) : "";
   document.getElementById("targetPe").value = pe ? pe.toFixed(2) : "";
@@ -176,8 +176,10 @@ function downloadPeImage() {
   const canvas = renderPeShareCard();
   const link = document.createElement("a");
   link.download = `alkebreet-pe-${Date.now()}.png`;
-  link.href = canvas.toDataURL("image/png");
+  link.href = canvas.toDataURL("image/png", 1.0);
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 }
 
 async function shareOnX() {
