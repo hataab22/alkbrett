@@ -70,12 +70,22 @@ function calcPe() {
     cls = "pe-overpriced";
   }
 
+  // مستويات السعر المستهدف مثل الإكسل (Q13:Q18 = المضاعف * ربحية السنة)
+  const targetLevels = [12, 15, 17, 19, 25, 27];
+  const targetsHtml = targetLevels
+    .map((level) => `<li>مستهدف ${level}x: <strong>${fmt(level * yearly, 2)}</strong></li>`)
+    .join("");
+
   document.getElementById("peResult").innerHTML = `
     اسم السهم: <strong>${stockName}</strong><br>
     ربحية السهم (آخر ربع معلن): ${fmt(q, 4)}<br>
     ربحية سنوية: ${fmt(yearly, 4)}<br>
     مكرر الربحية (المستهدف): <strong>${fmt(pe, 2)}</strong><br>
     التصنيف: <span class="pe-badge ${cls}">${label}</span>
+    <div class="target-box">
+      أسعار مستهدفة مبنية على ربحية السنة:
+      <ul>${targetsHtml}</ul>
+    </div>
     <div class="pe-ranges">
       نطاق تقييم المكرر:
       <ul>
