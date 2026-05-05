@@ -96,6 +96,19 @@ input {
 .pe-fair { background: #7a5e12; color: #fff5cf; }
 .pe-high { background: #8b3d16; color: #ffe8dc; }
 .pe-overpriced { background: #882727; color: #ffdede; }
+.target-box {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #456897;
+  color: #efe4cf;
+}
+.target-box ul {
+  margin: 8px 0 0;
+  padding-right: 18px;
+}
+.target-box li {
+  margin: 6px 0;
+}
 .pe-ranges {
   margin-top: 12px;
   padding-top: 10px;
