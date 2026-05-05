@@ -15,6 +15,12 @@ const n = (v) => {
   return Number.isFinite(x) ? x : 0;
 };
 const fmt = (v, d = 2) => n(v).toLocaleString("ar-SA", { maximumFractionDigits: d });
+const todayAr = () =>
+  new Date().toLocaleDateString("ar-SA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 
 function peLabel(pe) {
   if (pe > 0 && pe < 10) return { label: "ممتاز", cls: "pe-excellent" };
@@ -63,6 +69,7 @@ function calcDeals() {
 
 function calcPe() {
   const { stockName, price, q, yearly, pe, tag, targets } = getPeData();
+  const today = todayAr();
 
   document.getElementById("yearlyEps").value = yearly ? yearly.toFixed(4) : "";
   document.getElementById("targetPe").value = pe ? pe.toFixed(2) : "";
@@ -116,6 +123,7 @@ function calcPe() {
         </div>
       </div>
       <p class="pe-credits">
+        تاريخ النتيجة: <strong>${today}</strong><br>
         استراتيجية المخضرم هنا مطبقة على حساب مكرر الربحية فقط.
         حساب المخضرم في X: <a href="https://x.com/SenseiFund" target="_blank" rel="noreferrer">@SenseiFund</a>
         | حساب الكبريت في X: <a href="https://x.com/alkbrett" target="_blank" rel="noreferrer">@alkbrett</a>
@@ -126,6 +134,7 @@ function calcPe() {
 
 function renderPeShareCard() {
   const { stockName, q, yearly, pe, tag, targets } = getPeData();
+  const today = todayAr();
   const canvas = document.createElement("canvas");
   canvas.width = 1200;
   canvas.height = 630;
@@ -153,13 +162,14 @@ function renderPeShareCard() {
   ctx.fillText(`ربحية السنة: ${fmt(yearly, 4)}`, 1120, 265);
   ctx.fillText(`مكرر الربحية المستهدف: ${fmt(pe, 2)}`, 1120, 310);
   ctx.fillText(`التصنيف: ${tag.label}`, 1120, 355);
+  ctx.fillText(`التاريخ: ${today}`, 1120, 400);
 
   ctx.font = "24px Segoe UI";
   ctx.fillStyle = "#ffd896";
-  ctx.fillText("المستهدفات:", 1120, 410);
+  ctx.fillText("المستهدفات:", 1120, 450);
   ctx.fillStyle = "#f6f2e8";
   targets.forEach((t, i) => {
-    ctx.fillText(`${t.level}x = ${fmt(t.price, 2)}`, 1120, 445 + i * 28);
+    ctx.fillText(`${t.level}x = ${fmt(t.price, 2)}`, 1120, 485 + i * 24);
   });
 
   // علامة مائية
