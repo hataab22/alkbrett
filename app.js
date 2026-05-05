@@ -72,8 +72,18 @@ function calcPe() {
 
   // مستويات السعر المستهدف مثل الإكسل (Q13:Q18 = المضاعف * ربحية السنة)
   const targetLevels = [12, 15, 17, 19, 25, 27];
+  const levelClass = (level) => {
+    if (level < 10) return "pe-excellent";
+    if (level < 15) return "pe-good";
+    if (level < 20) return "pe-fair";
+    if (level < 30) return "pe-high";
+    return "pe-overpriced";
+  };
   const targetsHtml = targetLevels
-    .map((level) => `<li>مستهدف ${level}x: <strong>${fmt(level * yearly, 2)}</strong></li>`)
+    .map(
+      (level) =>
+        `<li><span class="pe-badge ${levelClass(level)}">${level}x</span> <strong>${fmt(level * yearly, 2)}</strong></li>`,
+    )
     .join("");
 
   document.getElementById("peResult").innerHTML = `
@@ -82,19 +92,21 @@ function calcPe() {
     ربحية سنوية: ${fmt(yearly, 4)}<br>
     مكرر الربحية (المستهدف): <strong>${fmt(pe, 2)}</strong><br>
     التصنيف: <span class="pe-badge ${cls}">${label}</span>
-    <div class="target-box">
-      أسعار مستهدفة مبنية على ربحية السنة:
-      <ul>${targetsHtml}</ul>
-    </div>
-    <div class="pe-ranges">
-      نطاق تقييم المكرر:
-      <ul>
-        <li><span class="pe-badge pe-excellent">ممتاز</span> أقل من 10</li>
-        <li><span class="pe-badge pe-good">جيد</span> من 10 إلى أقل من 15</li>
-        <li><span class="pe-badge pe-fair">عادل</span> من 15 إلى أقل من 20</li>
-        <li><span class="pe-badge pe-high">مرتفع</span> من 20 إلى أقل من 30</li>
-        <li><span class="pe-badge pe-overpriced">مبالغ فيه</span> 30 فأكثر</li>
-      </ul>
+    <div class="pe-side-by-side">
+      <div class="target-box">
+        أسعار مستهدفة مبنية على ربحية السنة:
+        <ul>${targetsHtml}</ul>
+      </div>
+      <div class="pe-ranges">
+        نطاق تقييم المكرر:
+        <ul>
+          <li><span class="pe-badge pe-excellent">ممتاز</span> أقل من 10</li>
+          <li><span class="pe-badge pe-good">جيد</span> من 10 إلى أقل من 15</li>
+          <li><span class="pe-badge pe-fair">عادل</span> من 15 إلى أقل من 20</li>
+          <li><span class="pe-badge pe-high">مرتفع</span> من 20 إلى أقل من 30</li>
+          <li><span class="pe-badge pe-overpriced">مبالغ فيه</span> 30 فأكثر</li>
+        </ul>
+      </div>
     </div>
   `;
 }
